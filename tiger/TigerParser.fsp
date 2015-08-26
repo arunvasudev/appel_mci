@@ -1,0 +1,18 @@
+%{
+%}
+
+%token <string> ID
+%token <int> INT
+
+%token IF THEN ELSE
+%token TYPE ARRAY OF
+
+%token EOF
+
+%start start
+%type <string> start
+
+%%
+
+start:
+    |           { "To come later!" } // to come later
