@@ -5,12 +5,40 @@ open Microsoft.FSharp.Text.Lexing
 open TigerParser
 open System
 
-let keywords =
+let keywordsMap =
     [
        "if", IF;
        "then", THEN;
-       "else", ELSE
+       "else", ELSE;
+       "var", VAR;
+       "array", ARRAY;
+       "function", FUNCTION
     ] |> Map.ofList
+
+let compopsMap =
+    [
+        "<>", NE;
+        ">", GT;
+        "<", LT;
+        "=", EQ
+    ] |> Map.ofList
+
+let parensMap = 
+    [
+        "(", LPAREN;
+        ")", RPAREN;
+        "[", LSQUARE;
+        "]", RSQUARE;
+        "{", LBRACE;
+        "}", RBRACE;
+    ] |> Map.ofList
+
+let puncsMap =
+    [
+        ";", SEMICOLON;
+        ",", COMMA;
+        ".", DOT;
+    ] |> Map.ofList 
 
 let lexeme lexbuf = LexBuffer<char>.LexemeString lexbuf
 }
@@ -21,13 +49,27 @@ let int             = '-'?digit+
 let identifier      = char(char|digit|['-' '_' '.'])*
 let whitespace      = [' ' '\t']
 let newline         = "\n\r" | '\n' | '\r'
+let compops         = "<>" | '<' | '>' | '='
+let assignop        = ":="
+let parens          = ['(' ')' '{' '}' '[' ']']
+let puncs           = [';' ',' '.']
 
 rule tokenize = parse
 | whitespace    { tokenize lexbuf }
 | newline       { lexbuf.EndPos <- lexbuf.EndPos.NextLine; tokenize lexbuf }
 | int           { INT(Int32.Parse(lexeme lexbuf)) }
-| identifier    { match keywords.TryFind(lexeme lexbuf) with
+| identifier    { match keywordsMap.TryFind(lexeme lexbuf) with
                   | Some(token) -> token 
                   | None -> ID(lexeme lexbuf) }
+| compops       { match compopsMap.TryFind(lexeme lexbuf) with
+                  | Some(token) -> token 
+                  | None -> failwith (Printf.sprintf "BUG: unknown comparison operator '%s' found" (lexeme lexbuf))} 
+| assignop      { ASSIGN }
+| parens        { match parensMap.TryFind(lexeme lexbuf) with
+                  | Some(token) -> token 
+                  | None -> failwith (Printf.sprintf "BUG: unknown paren '%s' found" (lexeme lexbuf))}
+| puncs         { match puncsMap.TryFind(lexeme lexbuf) with
+                  | Some(token) -> token 
+                  | None -> failwith (Printf.sprintf "BUG: unknown punctuation '%s' found" (lexeme lexbuf))}
 | eof           { EOF }
 

@@ -6,8 +6,12 @@
 
 %token IF THEN ELSE
 %token TYPE ARRAY OF
+%token VAR FUNCTION 
 
 %token EOF
+%token EQ ASSIGN NE LT GT
+%token COLON SEMICOLON COMMA DOT 
+%token LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE LANGULAR RANGULAR
 
 %start start
 %type <string> start
